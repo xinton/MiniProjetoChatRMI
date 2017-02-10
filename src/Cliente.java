@@ -11,46 +11,80 @@ import java.util.logging.Logger;
 public class Cliente  extends UnicastRemoteObject implements ClienteIF{
 
 	static Scanner kB;
-	static boolean isRunning = true;
 	private String nome;
+	private String id;
 	
-	public Cliente (String nome) throws RemoteException {
+	public Cliente (String id, String nome) throws RemoteException {
+		this.id = id;
 		this.nome = nome;
 	}
 	
 	public void showMensage(String msg) throws RemoteException {
-        System.out.println("showMensage"+msg);
+        System.out.println(msg);
     }
+	
+	public String getId() {
+		return id;
+	}
 
-	public String getNome() {
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public String getNome() throws RemoteException{
 		return nome;
 	}
 
-	public void setNome(String nome) {
+	public void setNome(String nome) throws RemoteException{
 		this.nome = nome;
 	}
-
-	public static void main(String[] args) {
-		kB = new Scanner(System.in);
+	
+	public static void main(String[] args) {		
 		try {
-            ConectaIF servidorConect = (ConectaIF) 
-            Naming.lookup("rmi://localhost/servidor");
-            servidorConect.conectar("Guest");
+			kB = new Scanner(System.in);
+            ServidorIF servidor = (ServidorIF )Naming.lookup("rmi://localhost/servidor");
+            Cliente cliente = new Cliente("1","Guest");
+            servidor.conectar(cliente);
+			String outMsg = "";		
             
-            MensagemIF servidorMensage= (MensagemIF) 
-                    Naming.lookup("rmi://localhost/servidor");
-            
-            System.out.println("Mini Chat (Digite 'bye' pra sair)");
-			String outMsg = "";
-			System.out.print("Out: ");
-            
-            do{						
+           do{	
+        	   
+        	   System.out.println(
+       				"Mini Chat (Digite 'bye' pra sair)"
+       				+ "\n [1]Listar usuarios"
+       				+ "\n [2]Renomear"
+       				+ "\n [3]Enviar para o chat"
+       				+ "\n [4]Mensagem privada");
+        	   System.out.print("Out: ");
 				outMsg = kB.nextLine();
-				servidorMensage.mensagem(outMsg);
-				System.out.print("Out: ");
-				/*if (!s.isClosed()){
-					dataOut.writeUTF(outMsg);
-				} else {break;}*/				
+				
+				switch(outMsg){
+				case "1":
+					servidor.listarUsuarios(cliente.getId());
+					break;
+
+				case "2":
+					System.out.println("Insira um nome de usuario!");
+					outMsg = kB.nextLine();
+					servidor.rename(cliente.getId(),outMsg);
+					break;
+
+				case "3":
+					System.out.println("Escreva uma mensagem!");
+					outMsg = kB.nextLine();
+					servidor.mensagem(cliente.getId(),outMsg);
+					break;
+
+				case "4":
+					break;
+
+				default:
+					System.out.println("Comando invalido!");
+					break;
+				}
+				
+				
+				
 			}while(!outMsg.equals("bye"));
             
         } catch (NotBoundException | MalformedURLException | RemoteException ex) {
@@ -58,4 +92,8 @@ public class Cliente  extends UnicastRemoteObject implements ClienteIF{
         }
 			
 	}
+
+	
+
+	
 }

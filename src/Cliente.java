@@ -11,18 +11,19 @@ import java.util.logging.Logger;
 public class Cliente  extends UnicastRemoteObject implements ClienteIF{
 
 	static Scanner kB;
+	static Scanner entrada;
 	private String nome;
 	private String id;
-	
-	public Cliente (String id, String nome) throws RemoteException {
-		this.id = id;
+
+	public Cliente (String nome) throws RemoteException {
+		this.id = nome;
 		this.nome = nome;
 	}
-	
+
 	public void showMensage(String msg) throws RemoteException {
-        System.out.println(msg);
-    }
-	
+		System.out.println(msg);
+	}
+
 	public String getId() {
 		return id;
 	}
@@ -38,27 +39,34 @@ public class Cliente  extends UnicastRemoteObject implements ClienteIF{
 	public void setNome(String nome) throws RemoteException{
 		this.nome = nome;
 	}
-	
+
 	public static void main(String[] args) {		
 		try {
-			kB = new Scanner(System.in);
-            ServidorIF servidor = (ServidorIF )Naming.lookup("rmi://localhost/servidor");
-            Cliente cliente = new Cliente("1","Guest");
-            servidor.conectar(cliente);
+			entrada = new Scanner(System.in);
+			ServidorIF servidor = (ServidorIF )Naming.lookup("rmi://localhost/servidor");
 			String outMsg = "";		
-            
-           do{	
-        	   
-        	   System.out.println(
-       				"Mini Chat (Digite 'bye' pra sair)"
-       				+ "\n [1]Listar usuarios"
-       				+ "\n [2]Renomear"
-       				+ "\n [3]Enviar para o chat"
-       				+ "\n [4]Mensagem privada");
-        	   System.out.print("Out: ");
+			System.out.println("Bem vindo ao chat, favor inserir seu nome para logar!");
+			String mensagemEntrada = entrada.nextLine();
+			
+			while(mensagemEntrada.contains(" ") || mensagemEntrada.isEmpty() || mensagemEntrada.length() == 0) {
+				System.out.println("Bem vindo ao chat, favor inserir seu nome para logar!");
+				mensagemEntrada = entrada.nextLine();
+			}
+			Cliente cliente = new Cliente(mensagemEntrada);
+			servidor.conectar(cliente);
+			kB = new Scanner(System.in);
+			
+			do {	
+				System.out.println(
+						"Mini Chat (Digite 'bye' pra sair)"
+								+ "\n [1]Listar usuarios"
+								+ "\n [2]Renomear"
+								+ "\n [3]Enviar para o grupo"
+								+ "\n [4]Mensagem privada");
+				System.out.print("Out: ");
 				outMsg = kB.nextLine();
 				
-				switch(outMsg){
+				switch(outMsg) {
 				case "1":
 					servidor.listarUsuarios(cliente.getId());
 					break;
@@ -72,28 +80,26 @@ public class Cliente  extends UnicastRemoteObject implements ClienteIF{
 				case "3":
 					System.out.println("Escreva uma mensagem!");
 					outMsg = kB.nextLine();
-					servidor.mensagem(cliente.getId(),outMsg);
+					servidor.sendAll(cliente.getId(),outMsg);
 					break;
 
 				case "4":
+					System.out.println("Escreva o nome do usuario!");
+					String nomeUsuario = kB.nextLine();
+					System.out.println("Escreva uma mensagem!");
+					outMsg = kB.nextLine();
+					servidor.send(cliente.id, nomeUsuario, outMsg);
 					break;
 
 				default:
 					System.out.println("Comando invalido!");
 					break;
 				}
-				
-				
-				
-			}while(!outMsg.equals("bye"));
-            
-        } catch (NotBoundException | MalformedURLException | RemoteException ex) {
-            Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
-        }
-			
+
+			} while(!outMsg.equals("bye"));
+		} catch (NotBoundException | MalformedURLException | RemoteException ex) {
+			Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
+		}			
 	}
 
-	
-
-	
 }

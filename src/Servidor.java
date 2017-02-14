@@ -57,6 +57,17 @@ public class Servidor extends UnicastRemoteObject implements ServidorIF{
 
 		return true;
 	}
+	@Override
+	public boolean isUsuarioValido(String nome) throws RemoteException {
+		for (Entry<String, ClienteIF> entry : clientes.entrySet()) {
+
+			if(entry.getKey().equals(nome)) {
+				return false;
+			}
+		}
+
+		return true;
+	}
 
 	@Override
 	public void sendAll(String origem, String mensagem) throws RemoteException { 

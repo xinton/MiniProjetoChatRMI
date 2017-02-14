@@ -45,17 +45,22 @@ public class Cliente  extends UnicastRemoteObject implements ClienteIF{
 			entrada = new Scanner(System.in);
 			ServidorIF servidor = (ServidorIF )Naming.lookup("rmi://localhost/servidor");
 			String outMsg = "";		
-			System.out.println("Bem vindo ao chat, favor inserir seu nome para logar!");
+			System.out.println("Bem vindo ao chat, favor inserir seu nome sem espaços para logar!");
 			String mensagemEntrada = entrada.nextLine();
 			
-			while(mensagemEntrada.contains(" ") || mensagemEntrada.isEmpty() || mensagemEntrada.length() == 0) {
-				System.out.println("Bem vindo ao chat, favor inserir seu nome para logar!");
-				mensagemEntrada = entrada.nextLine();
+			while(!servidor.isUsuarioValido(mensagemEntrada) || mensagemEntrada.contains(" ") || mensagemEntrada.isEmpty() || mensagemEntrada.length() == 0) {
+				if (!servidor.isUsuarioValido(mensagemEntrada)) {
+					System.out.println("Usuário já existente, insira outro nome!");
+					mensagemEntrada = entrada.nextLine();
+				} else {
+					System.out.println("Você inseriu espaços, favor inserir seu nome sem espaços!");
+					mensagemEntrada = entrada.nextLine();
+				}
 			}
 			Cliente cliente = new Cliente(mensagemEntrada);
 			servidor.conectar(cliente);
 			kB = new Scanner(System.in);
-			
+
 			do {	
 				System.out.println(
 						"Mini Chat (Digite 'bye' pra sair)"
@@ -65,7 +70,7 @@ public class Cliente  extends UnicastRemoteObject implements ClienteIF{
 								+ "\n [4]Mensagem privada");
 				System.out.print("Out: ");
 				outMsg = kB.nextLine();
-				
+
 				switch(outMsg) {
 				case "1":
 					servidor.listarUsuarios(cliente.getId());
@@ -90,16 +95,16 @@ public class Cliente  extends UnicastRemoteObject implements ClienteIF{
 					outMsg = kB.nextLine();
 					servidor.send(cliente.id, nomeUsuario, outMsg);
 					break;
+				case "bye":
+					break;
 
 				default:
 					System.out.println("Comando invalido!");
 					break;
 				}
-
 			} while(!outMsg.equals("bye"));
 		} catch (NotBoundException | MalformedURLException | RemoteException ex) {
 			Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
 		}			
 	}
-
 }

@@ -9,4 +9,5 @@ public interface ServidorIF extends Remote{
 	public void rename(String origem, String nome) throws RemoteException;
 	public void sendAll(String origem, String mensagem) throws RemoteException;
 	public void send(String origem,String destino, String mensagem) throws RemoteException;
+	public boolean isUsuarioValido(String nome) throws RemoteException;
 }

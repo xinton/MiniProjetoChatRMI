@@ -3,6 +3,7 @@ import java.rmi.RemoteException;
 
 public interface ServidorIF extends Remote{
 	public void conectar(ClienteIF cliente) throws RemoteException;
+	public void desconectar(String id) throws RemoteException;
 	public void mensagem(String origem, String mensagem) throws RemoteException;
 	
 	public void listarUsuarios(String origem) throws RemoteException;

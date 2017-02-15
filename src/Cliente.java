@@ -96,6 +96,8 @@ public class Cliente  extends UnicastRemoteObject implements ClienteIF{
 					servidor.send(cliente.id, nomeUsuario, outMsg);
 					break;
 				case "bye":
+					servidor.desconectar(cliente.getId());
+					System.exit(0);
 					break;
 
 				default:

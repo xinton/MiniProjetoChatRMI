@@ -26,6 +26,10 @@ public class Servidor extends UnicastRemoteObject implements ServidorIF{
 	public void conectar(ClienteIF cliente) throws RemoteException {
 		clientes.put(cliente.getId(), cliente);
 	}
+	
+	public void desconectar(String id) throws RemoteException {
+		clientes.remove(id);
+	}
 
 	public void listarUsuarios(String origem) throws RemoteException{
 		String mensagem = "Usuarios Online: \n";
@@ -98,9 +102,14 @@ public class Servidor extends UnicastRemoteObject implements ServidorIF{
 	@Override
 	public void send(String origem, String destino, String mensagem) throws RemoteException {
 		if(this.findCliente(destino) != null) {
-			DateFormat dateFormat = new SimpleDateFormat("HH:mm dd/MM/yyyy");
-			String mensagemFormatada = "/~" + origem + " : " + mensagem + " " + dateFormat.format(new Date());
-			clientes.get(destino).showMensage(mensagemFormatada);
+			if(destino.equals(origem)){
+				clientes.get(origem).showMensage("Usuario destino não pode ser o mesmo usuario de origem! \n");
+			} else {
+				DateFormat dateFormat = new SimpleDateFormat("HH:mm dd/MM/yyyy");
+				String mensagemFormatada = "/~" + origem + " : " + mensagem + " " + dateFormat.format(new Date());
+				clientes.get(destino).showMensage(mensagemFormatada);
+			}
+			
 		} else {
 			clientes.get(origem).showMensage("Usuário inexistente \n");
 		}
